@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const suites = [
+  ['客户端 bundle 冒烟', 'smoke-client.mjs'],
   ['i18n 键完整性', 'check-i18n.mjs'],
   ['M1 配置体系', 'test-m1-api.mjs'],
   ['M2 数据模型', 'test-m2-model.mjs'],
