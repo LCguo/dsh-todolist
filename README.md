@@ -1,103 +1,80 @@
-# @hz-jasonlin/dsh-todolist
+# dsh-todolist（本地化 v2）
 
-An independent todo board plugin for DeepSeek Harness.
+DeepSeek Harness 的独立待办看板插件。v2 在 v0.2.1 基础上做了**可配置化改造**，并补齐子任务、标签、搜索、三列看板、到期提醒、导入导出与 AI 工具拆分。
 
-独立待办看板插件，为 DeepSeek Harness（DSH）提供完整的待办管理能力。
+> 需求全文与验收标准见 `docs/requirements-v2.md`。
 
-## Features / 功能
+## 功能一览
 
-- 对话页顶部「待办」Tab，提供列表、今日、日历、周视图和项目视图
-- **全视图点击即编辑**：列表行、今日卡片、日历/周任务条、项目看板卡片点击直接打开编辑弹窗；勾选框单独承担完成/恢复；编辑弹窗内提供「删除」（二次确认弹窗，避免误触）
-- **日历 / 周视图拖动**：
-  - 拖动任务条到其他日期 → 修改日期（单日任务改期、跨度任务整体平移；落点格高亮提示）
-  - 拖动任务条到其他任务条上方/下方 → 调整排序（持久化）
-  - 长按空白日期后跨格拖动 → 快速创建跨度任务
-  - 每天最多展示 5 条泳道，超出折叠为「+N」，点击就地展开 / 收起
-- **今日视图拖动排序**：顶部「今日」与侧边栏「今日」卡片可拖动排序并持久保存；未手动排序前保持智能顺序（逾期 → 今日到期 → 周期 → 进行中）
-- **统一的指针与拖拽视觉**：悬停一律点击指针，拖动中才是拖动指针；任务拖动使用紧凑拖影，并屏蔽宿主（better-sidebar）的分栏落区遮罩
-- 横向项目看板，支持项目列拖动排序；可以直接在项目列中添加任务，并自动预填所属项目
-- 项目看板横向滚动条固定在顶部（镜像轨道）；最右侧「新建卡片」可随时创建空分类列（首个任务添加后自动转为正式项目列）
-- 项目列内已完成任务自动沉底，未完成按 逾期 → 截止日期 → 日期/周期排序
-- 项目筛选和项目看板完全由任务的 `proj` 数据驱动：新建任务时出现的项目会自动成为筛选选项
-- 任务完成状态记录 `doneAt`，日历和周视图按实际完成日期显示
-- 未完成的逾期任务自动显示到今天，并标注延期天数
-- 当天日期以蓝色圆圈 + 白字高亮
-- AI 工具：`todolist` 用于管理待办
-- 可选接入 `dsh-better-sidebar`，在其原生右侧栏提供「今日」Tab
-- 未安装 `dsh-better-sidebar` 时，提供独立的 Today 侧栏：按钮挂载到 DSH 原生 session header utilities，与 Session log 共用同一控制行；侧栏支持展开、收起、拖拽调宽和宽度持久化
-- 使用独立的本地存储，不依赖其他插件
+| 模块 | 说明 | 默认 |
+|---|---|---|
+| 列表 | 未完成按「逾期 → 截止 → 创建」排序；已完成按配置归入已办或置底 | 开（强制） |
+| 已办 | 已完成/已取消集中展示，按完成时间倒序 | 开 |
+| 搜索 | 顶部搜索，防抖 300ms；多关键词 AND；`#标签` / `@项目`；命中高亮 | 开 |
+| 今日 | 逾期、今日到期、周期任务 | 开 |
+| 日历 / 周 | 月视图、周泳道，支持拖拽改期与排序 | 开 |
+| 项目看板 | 横向项目列 | 开 |
+| 三列看板 | 待办/进行中/已完成；可切换按项目分组；拖拽改状态或项目，列内拖拽排序；`Alt+←/→` 键盘移动 | 开 |
+| 子任务 | 仅一层，只在父任务详情内展示与勾选；父任务显示 `1/3` 进度；删除父任务级联 | 开 |
+| 标签 | 多标签、去重、自动补全、多选筛选；设置页可全局重命名/删除（无颜色） | 开 |
+| 到期提醒 | 提前 5/15/60 分钟、当天 9 点；去重、免打扰、合并通知 | 开 |
+| 导入导出 | 导出 JSON/CSV；导入 JSON（合并/替换），自动备份，导入前预览 | 开 |
+| AI 写工具 | `todo_add` `todo_update` `todo_done` `todo_remove` `todo_list` | **关** |
+| AI 只读查询 | `todo_search`（无任何写副作用） | **关** |
 
-## Installation / 安装
+## 配置
 
-插件已发布到 npm，推荐直接用 DSH 插件 CLI 安装：
+配置存于 `<DSH_HOME>/todo-data/config.json`，与任务数据分离。面板右上角「⚙」打开设置：
 
-```powershell
-dsh plugin --profile web add @hz-jasonlin/dsh-todolist
-```
+- **预设档位**：极简（仅列表）/ 标准 / 完整
+- **模块开关**：上表 14 个模块逐项开关（`core.list` 强制开启）
+- **高级参数**：搜索防抖、标签数量/长度上限、看板默认分组、虚拟列表与阈值
+- **标签管理**：全局重命名、删除
+- **导入导出**：见上
 
-也可以从 GitHub 安装：
+配置保存后立即生效；AI 工具开关会即时注册/注销工具。
 
-```powershell
-dsh plugin --profile web add github:HZ-JasonLin/dsh-todolist
-```
+## AI 工具
 
-从源码构建（仅开发环境）：
+默认全部关闭（MCP 工具列表中不出现）。在设置中开启后：
 
-```powershell
-git clone https://github.com/HZ-JasonLin/dsh-todolist.git
-cd dsh-todolist
-npm install
+- `todo_add` — 新增任务/子任务（content 必填，支持 proj/who/start/due/dueTime/repeat/on/quadrant/tags/parentId）
+- `todo_update` — 修改字段（传空字符串清除）
+- `todo_done` — 完成；`undone: true` 恢复
+- `todo_remove` — 删除（默认级联子任务，`cascade: false` 可拒绝）
+- `todo_list` — 查看（默认智能视图，`all: true` 看全部）
+- `todo_search` — **只读**搜索，支持关键词/状态/项目/标签/日期范围/是否含子任务/limit
 
-# 构建客户端 bundle
-$env:DSH_SOURCE="<your-dsh-esbuild-environment>"   # 仅当本地构建环境需要时
-node scripts/build.mjs
-```
+所有写操作追加审计日志：`<DSH_HOME>/todo-data/ai-audit.log`（超过 200KB 裁剪到最近 1000 行）。
 
-插件可以独立使用，不要求安装 `dsh-better-sidebar`。只安装 `@hz-jasonlin/dsh-todolist` 时，顶部「待办」Tab 和完整待办功能仍然可用，同时会启用独立的 Today 侧栏。
+## 数据与备份
 
-如果同时安装了 `dsh-better-sidebar`，fallback 会自动停用，插件改为向 better-sidebar 注册原生「今日」Tab。这是自动让渡机制，不会出现两个侧栏入口。
+| 文件 | 说明 |
+|---|---|
+| `<DSH_HOME>/todo-data/todos.json` | 任务（原子写：tmp + rename） |
+| `<DSH_HOME>/todo-data/config.json` | 配置 |
+| `<DSH_HOME>/todo-data/todos-backup-*.json` | 导入前自动备份，保留最近 5 份 |
+| `<DSH_HOME>/todo-data/ai-audit.log` | AI 写操作审计 |
 
-## 数据存储 / Storage
+旧版（v0.2.1）`todos.json` 可被直接读取，加载时自动补齐 `parentId` / `tags` / `dueTime` / `reminderSent` / `updatedAt`。
 
-服务端会将数据存储在 DSH 配置的数据目录中：
+## 开发
 
-- `todo-data/todos.json`
+- 入口：`lib/index.js`（服务端：存储、HTTP API、AI 工具、快照）
+- 前端：`lib/client.js`（单文件 bundle，可读、未压缩；含 UI/i18n/CSS）
+- 样式追加层：`client.js` 里的 `extraStyles`（独立 style 标签注入，避免改动上游样式串）
+- 测试：`npm test`（i18n 静态检查 + M1~M10 功能测试 + 5000 条压测）
+- 压测：`npm run bench`
 
-运行时数据位于本仓库之外，不会被提交到 Git。
+本地开发流程：修改 `lib/*.js` → 重启 DSH Desktop（客户端 bundle 在启动时加载）→ 验证。
 
-## 开发构建 / Development Build
+## 已知边界
 
-```powershell
-# 仅当本地构建环境需要时设置 DSH_SOURCE
-$env:DSH_SOURCE="<your-dsh-esbuild-environment>"
-node scripts/build.mjs
-```
+- 提醒只在 DSH 运行期间调度，关闭期间不补发（重新打开后只补「未过期」的提醒点）
+- 系统通知依赖浏览器/Electron 的 `Notification` 权限；被拒绝时降级为控制台提示
+- 虚拟列表为「分批渲染 + 滚动加载」，不是严格意义的 DOM 虚拟化
+- 任务描述字段（`desc`）已在模型中预留，本期 UI 与搜索尚未使用
 
-构建产物写入 `lib/client.js`。
+## License
 
-## Changelog / 更新记录
-
-### v0.2.0 (2026-08-29)
-
-- 月历视觉收敛：今天日期为蓝色圆形 + 白字（无论是否选中/逾期均保持白色）；日期格直角、无缝隙，只靠 1px 分隔线；逾期红色提示仅用于非今天格
-- 项目看板横向滚动条固定在顶部（镜像轨道，底部滚动条隐藏）
-- 项目看板最右侧「新建卡片」：可随时创建空分类列，首个任务添加后自动转为正式项目列
-- 项目列内已完成任务自动沉底（修复排序 bug：已完成任务被排在周期任务之前）
-- 移除「待办建议」（suggestions）工具与四象限看板
-
-### v0.1.2 (2026-08-19)
-
-- 修复 package.json 带 UTF-8 BOM 导致 DSH 启动崩溃
-
-### v0.1.1 (2026-08-19)
-
-- 全视图点击即编辑；日历/周视图拖动改期与排序；今日视图拖动排序；折叠行展开
-- 删除二次确认弹窗；指针与拖拽视觉统一
-
-### v0.1.0 (2026-08-18)
-
-- 首个版本：列表/今日/日历/周/项目视图 + `todolist` AI 工具 + 独立本地存储
-
-## License / 许可证
-
-MIT
+MIT（上游 `@hz-jasonlin/dsh-todolist`）
