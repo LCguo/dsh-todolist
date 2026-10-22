@@ -1,0 +1,103 @@
+# @hz-jasonlin/dsh-todolist
+
+An independent todo board plugin for DeepSeek Harness.
+
+独立待办看板插件，为 DeepSeek Harness（DSH）提供完整的待办管理能力。
+
+## Features / 功能
+
+- 对话页顶部「待办」Tab，提供列表、今日、日历、周视图和项目视图
+- **全视图点击即编辑**：列表行、今日卡片、日历/周任务条、项目看板卡片点击直接打开编辑弹窗；勾选框单独承担完成/恢复；编辑弹窗内提供「删除」（二次确认弹窗，避免误触）
+- **日历 / 周视图拖动**：
+  - 拖动任务条到其他日期 → 修改日期（单日任务改期、跨度任务整体平移；落点格高亮提示）
+  - 拖动任务条到其他任务条上方/下方 → 调整排序（持久化）
+  - 长按空白日期后跨格拖动 → 快速创建跨度任务
+  - 每天最多展示 5 条泳道，超出折叠为「+N」，点击就地展开 / 收起
+- **今日视图拖动排序**：顶部「今日」与侧边栏「今日」卡片可拖动排序并持久保存；未手动排序前保持智能顺序（逾期 → 今日到期 → 周期 → 进行中）
+- **统一的指针与拖拽视觉**：悬停一律点击指针，拖动中才是拖动指针；任务拖动使用紧凑拖影，并屏蔽宿主（better-sidebar）的分栏落区遮罩
+- 横向项目看板，支持项目列拖动排序；可以直接在项目列中添加任务，并自动预填所属项目
+- 项目看板横向滚动条固定在顶部（镜像轨道）；最右侧「新建卡片」可随时创建空分类列（首个任务添加后自动转为正式项目列）
+- 项目列内已完成任务自动沉底，未完成按 逾期 → 截止日期 → 日期/周期排序
+- 项目筛选和项目看板完全由任务的 `proj` 数据驱动：新建任务时出现的项目会自动成为筛选选项
+- 任务完成状态记录 `doneAt`，日历和周视图按实际完成日期显示
+- 未完成的逾期任务自动显示到今天，并标注延期天数
+- 当天日期以蓝色圆圈 + 白字高亮
+- AI 工具：`todolist` 用于管理待办
+- 可选接入 `dsh-better-sidebar`，在其原生右侧栏提供「今日」Tab
+- 未安装 `dsh-better-sidebar` 时，提供独立的 Today 侧栏：按钮挂载到 DSH 原生 session header utilities，与 Session log 共用同一控制行；侧栏支持展开、收起、拖拽调宽和宽度持久化
+- 使用独立的本地存储，不依赖其他插件
+
+## Installation / 安装
+
+插件已发布到 npm，推荐直接用 DSH 插件 CLI 安装：
+
+```powershell
+dsh plugin --profile web add @hz-jasonlin/dsh-todolist
+```
+
+也可以从 GitHub 安装：
+
+```powershell
+dsh plugin --profile web add github:HZ-JasonLin/dsh-todolist
+```
+
+从源码构建（仅开发环境）：
+
+```powershell
+git clone https://github.com/HZ-JasonLin/dsh-todolist.git
+cd dsh-todolist
+npm install
+
+# 构建客户端 bundle
+$env:DSH_SOURCE="<your-dsh-esbuild-environment>"   # 仅当本地构建环境需要时
+node scripts/build.mjs
+```
+
+插件可以独立使用，不要求安装 `dsh-better-sidebar`。只安装 `@hz-jasonlin/dsh-todolist` 时，顶部「待办」Tab 和完整待办功能仍然可用，同时会启用独立的 Today 侧栏。
+
+如果同时安装了 `dsh-better-sidebar`，fallback 会自动停用，插件改为向 better-sidebar 注册原生「今日」Tab。这是自动让渡机制，不会出现两个侧栏入口。
+
+## 数据存储 / Storage
+
+服务端会将数据存储在 DSH 配置的数据目录中：
+
+- `todo-data/todos.json`
+
+运行时数据位于本仓库之外，不会被提交到 Git。
+
+## 开发构建 / Development Build
+
+```powershell
+# 仅当本地构建环境需要时设置 DSH_SOURCE
+$env:DSH_SOURCE="<your-dsh-esbuild-environment>"
+node scripts/build.mjs
+```
+
+构建产物写入 `lib/client.js`。
+
+## Changelog / 更新记录
+
+### v0.2.0 (2026-08-29)
+
+- 月历视觉收敛：今天日期为蓝色圆形 + 白字（无论是否选中/逾期均保持白色）；日期格直角、无缝隙，只靠 1px 分隔线；逾期红色提示仅用于非今天格
+- 项目看板横向滚动条固定在顶部（镜像轨道，底部滚动条隐藏）
+- 项目看板最右侧「新建卡片」：可随时创建空分类列，首个任务添加后自动转为正式项目列
+- 项目列内已完成任务自动沉底（修复排序 bug：已完成任务被排在周期任务之前）
+- 移除「待办建议」（suggestions）工具与四象限看板
+
+### v0.1.2 (2026-08-19)
+
+- 修复 package.json 带 UTF-8 BOM 导致 DSH 启动崩溃
+
+### v0.1.1 (2026-08-19)
+
+- 全视图点击即编辑；日历/周视图拖动改期与排序；今日视图拖动排序；折叠行展开
+- 删除二次确认弹窗；指针与拖拽视觉统一
+
+### v0.1.0 (2026-08-18)
+
+- 首个版本：列表/今日/日历/周/项目视图 + `todolist` AI 工具 + 独立本地存储
+
+## License / 许可证
+
+MIT
