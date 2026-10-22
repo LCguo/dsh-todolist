@@ -94,6 +94,7 @@ const exportedKeys = Object.keys(moduleExports ?? {})
 console.log(`✓ bundle 加载成功，exports: ${exportedKeys.join(', ')}`)
 
 const registeredSlots = []
+const registeredComponents = new Map()
 const effects = []
 const ctx = {
   locale: {
@@ -107,8 +108,10 @@ const ctx = {
       cb()
       return () => {}
     },
-    register(options) {
-      registeredSlots.push(`${options.name}${options.key ? `#${options.key}` : options.id ? `#${options.id}` : ''}`)
+    register(options, component) {
+      const slotId = `${options.name}${options.key ? `#${options.key}` : options.id ? `#${options.id}` : ''}`
+      registeredSlots.push(slotId)
+      if (typeof component === 'function') registeredComponents.set(slotId, component)
       return () => {}
     }
   },
@@ -144,4 +147,20 @@ if (missing.length > 0) {
   console.error(`✗ 缺少预期注册：${missing.join(', ')}`)
   process.exit(1)
 }
+
+// 真实执行一次主视图组件渲染，捕获组件体内的 TDZ / 初始化错误
+const mainComponent = registeredComponents.get('main#todolist')
+if (mainComponent === undefined) {
+  console.error('✗ 未捕获到 main#todolist 组件')
+  process.exit(1)
+}
+try {
+  const t = (key) => key
+  mainComponent({ sessionId: 'smoke-session', t })
+  console.log('✓ 主视图首次渲染通过（组件体初始化无 TDZ）')
+} catch (error) {
+  console.error('✗ 主视图渲染抛错：', error)
+  process.exit(1)
+}
+
 console.log('\nALL PASS')
