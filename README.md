@@ -62,7 +62,7 @@ DeepSeek Harness 的独立待办看板插件。v2 在 v0.2.1 基础上做了**�
 
 - 入口：`lib/index.js`（服务端：存储、HTTP API、AI 工具、快照）
 - 前端：`lib/client.js`（单文件 bundle，可读、未压缩；含 UI/i18n/CSS）
-- 样式追加层：`client.js` 里的 `extraStyles`（独立 style 标签注入，避免改动上游样式串）
+- 样式追加层：`client.js` 里的 `extraStyles`（独立 style 标签注入，避免改动基础样式串）
 - 测试：`npm test`（i18n 静态检查 + M1~M10 功能测试 + 5000 条压测）
 - 压测：`npm run bench`
 
@@ -77,4 +77,4 @@ DeepSeek Harness 的独立待办看板插件。v2 在 v0.2.1 基础上做了**�
 
 ## License
 
-MIT（上游 `@hz-jasonlin/dsh-todolist`）
+MIT，版权归属见 [LICENSE](./LICENSE)。

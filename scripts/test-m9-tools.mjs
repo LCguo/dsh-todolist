@@ -55,7 +55,7 @@ const byDue = await searchTool.execute({ dueAfter: '2026-11-01', dueBefore: '202
 check('日期范围过滤', byDue.items.every((item) => item.due >= '2026-11-01' && item.due <= '2026-12-31'))
 const limited = await searchTool.execute({ limit: 1 })
 check('limit 生效', limited.items.length === 1)
-check('返回精简字段', Object.keys(limited.items[0]).every((key) => ['id', 'text', 'status', 'proj', 'tags', 'due', 'dueTime', 'parentId'].includes(key)))
+check('返回精简字段', Object.keys(limited.items[0]).every((key) => ['id', 'title', 'body', 'text', 'status', 'proj', 'tags', 'due', 'dueTime', 'parentId'].includes(key)))
 
 console.log('只读保证')
 const before = readFileSync(join(dir, 'todos.json'), 'utf8')

@@ -1,5 +1,5 @@
 {
-  "name": "@hz-jasonlin/dsh-todolist",
+  "name": "@lcguo/dsh-todolist",
   "version": "2.0.0",
   "description": "独立待办看板（本地化 v2）：可配置模块、子任务、标签、搜索、三列看板、到期提醒、导入导出；AI 工具默认关闭，可按需开启只读查询。",
   "keywords": [
@@ -19,10 +19,7 @@
     "./client": "./lib/client.js",
     "./package.json": "./package.json"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/HZ-JasonLin/dsh-todolist.git"
-  },
+  "author": "LCguo",
   "engines": {
     "node": ">=20"
   },
