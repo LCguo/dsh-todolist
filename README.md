@@ -1,6 +1,6 @@
-# dsh-todolist
+﻿# dsh-todolist
 
-> 当前发布版本：**v0.0.1**
+> 当前发布版本：**v0.0.2**（D1 界面点验 + D2 存储保护）
 
 DeepSeek Harness 的独立待办看板插件。在初始版本基础上做了**可配置化改造**，并补齐子任务、标签、搜索、三列看板、到期提醒、导入导出与 AI 工具拆分。
 
@@ -55,8 +55,17 @@ DeepSeek Harness 的独立待办看板插件。在初始版本基础上做了**�
 |---|---|
 | `<DSH_HOME>/todo-data/todos.json` | 任务（原子写：tmp + rename） |
 | `<DSH_HOME>/todo-data/config.json` | 配置 |
-| `<DSH_HOME>/todo-data/todos-backup-*.json` | 导入前自动备份，保留最近 5 份 |
+| `<DSH_HOME>/todo-data/todos-backup-*.json` | 导入前自动备份，保留最近 5 份；设置页可手动备份/恢复 |
+| `<DSH_HOME>/todo-data/todos-corrupt-*.json` | 读坏时的原文件副本（不覆盖原文件） |
+| `<DSH_HOME>/todo-data/recovery.log` | 损坏发现 / 自动恢复 / 只读拒绝 / 手动恢复的审计记录 |
 | `<DSH_HOME>/todo-data/ai-audit.log` | AI 写操作审计 |
+
+### 读坏时的保护（D2）
+
+- **有可用备份**：先把原文件另存为 `todos-corrupt-<时间>.json`，再从最近一份能解析的备份恢复；面板顶部提示「已恢复到某时间的备份（N 条），原文件已另存为 …」，可关闭。
+- **没有可用备份**：进入只读保护态——新增/编辑/删除/导入/提醒记录/配置保存全部拒绝，不产生任何写盘；面板只显示说明、原文件副本名、可用备份与「重新加载 / 从最近备份恢复」。
+- 两种结果都写 `recovery.log`；正常保存仍是原子写（tmp + rename）。
+- API：`GET /api/health`、`POST /api/backup`、`POST /api/restore`（`{file?}`，缺省恢复最近一份）。
 
 旧版（v0.2.1）`todos.json` 可被直接读取，加载时自动补齐 `parentId` / `tags` / `dueTime` / `reminderSent` / `updatedAt`。
 
