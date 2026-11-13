@@ -14,6 +14,7 @@ const suites = [
   ['M8 导入导出', 'test-m8-io.mjs'],
   ['D2 存储保护', 'test-d2-storage.mjs'],
   ['M9 AI 工具', 'test-m9-tools.mjs'],
+  ['M11 附件', 'test-m11-attachments.mjs'],
   ['M10 5000 条压测', 'bench-5000.mjs'],
 ]
 
